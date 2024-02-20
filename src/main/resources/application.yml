@@ -1,0 +1,36 @@
+server:
+  port: 8007
+  servlet:
+    context-path: /app
+
+spring:
+  datasource:
+    password: 1234
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/inventory
+  jpa:
+    database: postgresql
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+       hibernate:
+        format_sql: true
+        hbm2ddl:
+          charset_name: UTF-8
+          import_files: scripts/user.sql,scripts/role.sql,scripts/module.sql,scripts/permission.sql
+        default_schema: main
+#        dialect: org.hibernate.dialect.postgreSQLDialect
+        jdbc:
+          time-zon: America/bogota
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+
+settings:
+  auth:
+    token-time: 30
