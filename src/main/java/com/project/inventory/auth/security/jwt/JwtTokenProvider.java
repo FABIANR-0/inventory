@@ -1,5 +1,6 @@
 package com.project.inventory.auth.security.jwt;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +19,7 @@ public class JwtTokenProvider {
     @Value("${settings.auth.token-time}")
     private Long timeToken;
 
-    SecretKey key = generarClaveSecreta();
+    SecretKey key = generateSecretKey();
 
     public String generateToken(String userName) {
 
@@ -45,15 +46,39 @@ public class JwtTokenProvider {
     }
 
     //validar el jwt recibido en la petición
+
+    public boolean validJwt(String jwt){
+        try {
+            Claims claims = Jwts
+                    .parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(jwt)
+                    .getPayload();
+
+            return claims != null;
+        } catch (Exception e) {
+            log.error("Failed to validate token: {}", e.getMessage());
+        }
+        return false;
+    }
+
+
     public String extractorUserName(String jwt) {
-        return this.extractAllClaims(jwt).getSubject();
+        return Jwts
+                .parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload()
+                .getSubject();
     }
 
-    private Claims extractAllClaims(String jwt) {
-        return Jwts.parser().verifyWith(key).build().parseSignedClaims(jwt).getPayload();
-    }
+//    private Claims extractAllClaims(String jwt) {
+//        return Jwts.parser().verifyWith(key).build().parseSignedClaims(jwt).getPayload();
+//    }
 
-    private static SecretKey generarClaveSecreta() {
+    private static SecretKey generateSecretKey() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA512");
             return keyGenerator.generateKey();

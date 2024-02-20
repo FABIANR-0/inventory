@@ -35,29 +35,34 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         //1. sacamos el jwt de la petición
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if ((authHeader == null) || !(authHeader.startsWith("Bearer "))){
-            filterChain.doFilter(request,response);
+        if ((authHeader == null) || !(authHeader.startsWith("Bearer "))) {
+            filterChain.doFilter(request, response);
             return;
         }
 
         //2. obtenemos el jwt
         String jwt = authHeader.split(" ")[1].trim();
 
+        if (!jwtTokenProvider.validJwt(jwt)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         //3. obtener el sub/username del jwt
         String userName = jwtTokenProvider.extractorUserName(jwt);
 
-        //4. settear el objeto de authenticación dentro del contexto de spring security
-        UserDetails userDetails =  userDetailsService.loadUserByUsername(userName);
+        //4. settear el objeto de autenticación dentro del contexto de spring security
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-          userDetails.getUsername(),
-          userDetails.getPassword(),
-          userDetails.getAuthorities()
+                userDetails.getUsername(),
+                userDetails.getPassword(),
+                userDetails.getAuthorities()
         );
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }
