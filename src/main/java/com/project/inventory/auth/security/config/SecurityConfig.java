@@ -72,7 +72,7 @@ public class SecurityConfig {
                         ObjectMapper mapper = new ObjectMapper();
                         response.setStatus(403);
                         response.setHeader("Content-Type", "application/json");
-                        response.addHeader("message", "application/json");
+                        response.addHeader("message", "forbidden");
                         mapper.writeValueAsString(map);
                         response.getWriter().write(mapper.writeValueAsString(map));
                     }).authenticationEntryPoint((request, response, authException) -> {
